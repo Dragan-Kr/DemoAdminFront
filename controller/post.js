@@ -2,9 +2,16 @@ const { json } = require('express');
 const Post = require('../model/Post');
 const multer=require('multer');
 const upload=multer({dest:'uploads/'});
-
+const bodyParser = require('body-parser');
 const express = require('express');
 const app = express();//konekcija(izmedju ostalog)
+app.use(express.json());
+const Counter = require('../model/Counter');
+
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }))
+// app.use(bodyParser.urlencoded({extended:false}));
+
 
 const getAllPosts = async(req,res)=>{
 
@@ -15,16 +22,6 @@ const getAllPosts = async(req,res)=>{
 
 
 
-// const imagePost=app.post('/api/post',upload.single('images'), (req,res)=>{
-
-// if(!req.file){
-//     res.send({code:500,msg:'err'});
-// }else{
-//     res.send({code:200,msg:'upload success'});
-// }
-
-
-// });
 
 const getPostById = async(req,res)=>{
 
@@ -36,28 +33,98 @@ const getPostById = async(req,res)=>{
     res.status(200).json({post});
 };
 
-const createPost = async(req,res)=>{
+
+
+
+
+// app.post('/api/post/',async (req,res) => {
+
+//     try {
+//       const { title, shortDescription, mainContent, isPublished, postDate, categories, createdBy } = req.body;
+//       //////////
+//       console.log("Images iz servera",images)
+//       const counter = await Counter.findOneAndUpdate(
+//         { index: "autoval" },
+//         { "$inc": { "seq": 1 } },
+//         { new: true }
+//       );
+  
+//       let seqId;
+  
+//       if (counter == null) {
+//         const newVal = new Counter({ index: "autoval", seq: 1 });
+//          newVal.save();
+//         seqId = 1;
+//       } else {
+//         seqId = counter.seq;
+//       }
+//       /////////////
+      
+//       const post = new Post({
+//         index: seqId,
+//         title,
+//         shortDescription,
+//         mainContent,
+//         isPublished,
+//         postDate,
+//         categories,
+//         createdBy,
+//       });
+  
+//       const newPost =await post.save();
+//       res.status(201).json(newPost);
+//     } catch (err) {
+//       res.status(400).json({ message: err.message });
+//     }
+//   },upload.any());
+
+
+
+
+
+const createPost = (async (req, res) => {
 
     try {
-        const { title, shortDescription, mainContent, isPublished,postDate,categories,createdBy } = req.body;
-    
-        const post = new Post({
-          title,
-          shortDescription,
-          mainContent,
-          isPublished,
-          postDate,
-          categories,         
-          createdBy
-        });
-    
-        const newPost = await post.save();
-        res.status(201).json(newPost);
-      } catch (err) {
-        res.status(400).json({ message: err.message });
+      const { title, shortDescription, mainContent, isPublished, postDate, categories, createdBy } = req.body;
+  
+      //////////
+      const counter = await Counter.findOneAndUpdate(
+        { index: "autoval" },
+        { "$inc": { "seq": 1 } },
+        { new: true }
+      );
+  
+      let seqId;
+  
+      if (counter == null) {
+        const newVal = new Counter({ index: "autoval", seq: 1 });
+        await newVal.save();
+        seqId = 1;
+      } else {
+        seqId = counter.seq;
       }
-    
-};
+       /////////////
+      //  const imagePath = formData.get('image')?.name;
+      // console.log("Ovo je imagePath",imagePath);
+      const post = new Post({
+        index: seqId,
+        title,
+        shortDescription,
+        mainContent,
+        isPublished,
+        postDate,
+        categories,
+        createdBy,
+      });
+  
+      const newPost = await post.save();
+      res.status(201).json(newPost);
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  },upload.array('images'));
+
+
 
 
 const updatePost=async(req,res)=>{
@@ -78,8 +145,11 @@ const updatePost=async(req,res)=>{
 
 const deletePost=async(req,res)=>{
      try {
-        const {id:postID} = req.params;
+        // const {_id:postID} = req.params;
+
+        const {params:{id:postID}}=req;
         const post = await Post.findOneAndDelete({_id:postID});
+
         if(!post){
             return res.status(404).json({msg: `No post with id: ${postID}` });
         }

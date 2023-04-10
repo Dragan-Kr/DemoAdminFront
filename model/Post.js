@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
-const { format } = require('date-fns');
+// const { format } = require('date-fns');
 
 const autoIncrement = require('mongoose-auto-increment');
 
 const postSchema = new mongoose.Schema({
-   // index: { type: Number, required: true, unique: true },
+   index: { type: Number },
 
    title: {
       type: String,
@@ -44,16 +44,22 @@ const postSchema = new mongoose.Schema({
    createdBy: {//one to many tj.user ima vise poslova
       type: mongoose.Types.ObjectId,
       ref: 'Writer',//referenca na odredjenog USER-a,
-      required: [true, 'Please provide writer']
+      required: [true, 'Please provide writter']
 
    }
 
 
 });
 
+// autoIncrement.initialize(mongoose.connection);
+// postSchema.plugin(autoIncrement.plugin, { model: 'Post', field: 'index' });
 
 
 module.exports = mongoose.model('Post', postSchema);
+
+
+
+
 
 
 // autoIncrement.initialize(mongoose.connection);
