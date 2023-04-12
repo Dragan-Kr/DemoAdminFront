@@ -35,36 +35,36 @@ app.use('/api/postCategory',postCategory);
 
 
 
-app.post('/api/image', upload.array('images2[]'), (req, res) => {
+app.post('/api/image', upload.array('images2[]'), (req, res) => {//radi
 
 
-console.log("Req.file",req)
+// console.log("Req.file",req)
 
     if (!req.file) {
       res.send({ code: 500, msg: 'err' });
     } else {
       res.send({ code: 200, msg: 'uploaded' });
     }
-  
+   
   });
 
 
 
-// app.post('/api/image', upload.array('image',12), (req, res) => {
-//     new Promise((resolve, reject) => {
-//       if (!req.file) {
-//         reject({ code: 500, msg: 'err' });
-//       } else {
-//         resolve({ code: 200, msg: 'uploaded' });
-//       }
-//     })
-//     .then((response) => {
-//       res.send(response);
-//     })
-//     .catch((error) => {
-//       res.send(error);
-//     });
-//   });
+  // app.post('/api/image', upload.array('images2[]'), (req, res)  => {
+  //   new Promise((resolve, reject) => {
+  //     if (!req.file) {
+  //       reject({ code: 500, msg: 'err' });
+  //     } else {
+  //       resolve({ code: 200, msg: 'uploaded' });
+  //     }
+  //   })
+  //   .then((response) => {
+  //     res.send(response);
+  //   })
+  //   .catch((error) => {
+  //     res.send(error);
+  //   });
+  // });
   
 
 

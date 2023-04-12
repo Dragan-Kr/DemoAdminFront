@@ -11,10 +11,10 @@ const Counter = require('../model/Counter');
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }))
 // app.use(bodyParser.urlencoded({extended:false}));
-const Fs = require('@supercharge/fs')
-
-
-
+// const Fs = require('@supercharge/fs')
+const fs = require('fs')
+// const path = require('node:path'); 
+var path2 = require('path');
 const getAllPosts = async (req, res) => {
 
   const posts = await Post.find({});
@@ -39,46 +39,64 @@ const getPostById = async (req, res) => {
 
 
 
-// app.post('/api/post/',async (req,res) => {
+const createPost = async (req, res) => {
 
-//     try {
-//       const { title, shortDescription, mainContent, isPublished, postDate, categories, createdBy } = req.body;
-//       //////////
-//       console.log("Images iz servera",images)
-//       const counter = await Counter.findOneAndUpdate(
-//         { index: "autoval" },
-//         { "$inc": { "seq": 1 } },
-//         { new: true }
-//       );
+  try {
+    const { title, shortDescription, mainContent, isPublished, postDate, categories, createdBy, images } = req.body;
+    //////////
+    const counter = await Counter.findOneAndUpdate(
+      { index: "autoval" },
+      { "$inc": { "seq": 1 } },
+      { new: true }
+    );
 
-//       let seqId;
+    let seqId;
 
-//       if (counter == null) {
-//         const newVal = new Counter({ index: "autoval", seq: 1 });
-//          newVal.save();
-//         seqId = 1;
-//       } else {
-//         seqId = counter.seq;
-//       }
-//       /////////////
+    if (counter == null) {
+      const newVal = new Counter({ index: "autoval", seq: 1 });
+      newVal.save();
+      seqId = 1;
+    } else {
+      seqId = counter.seq;
+    }
+    /////////////
 
-//       const post = new Post({
-//         index: seqId,
-//         title,
-//         shortDescription,
-//         mainContent,
-//         isPublished,
-//         postDate,
-//         categories,
-//         createdBy,
-//       });
 
-//       const newPost =await post.save();
-//       res.status(201).json(newPost);
-//     } catch (err) {
-//       res.status(400).json({ message: err.message });
-//     }
-//   },upload.any());
+
+
+    const filePath = fs.realpathSync('uploads', []);
+
+    //  console.log("Ovo je filePath",filePath);
+    let arrayOfImagesParths = [];
+
+    for (let index in images) {
+      let combinedPath = path2.resolve(filePath, images[index]);
+
+      arrayOfImagesParths.push(combinedPath);
+
+    }
+    console.log("arrayOfImagesParths", arrayOfImagesParths)
+
+    
+
+    const post = new Post({
+      index: seqId,
+      title,
+      shortDescription,
+      mainContent,
+      isPublished,
+      postDate,
+      categories,
+      createdBy,
+      images:arrayOfImagesParths
+    });
+
+    const newPost = await post.save();
+    res.status(201).json(newPost);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
 
 
 
@@ -162,7 +180,7 @@ const deletePost = async (req, res) => {
 module.exports = {
   getAllPosts,
   getPostById,
-  // createPost,
+  createPost,
   updatePost,
   deletePost,
   // uploadImage,

@@ -37,16 +37,17 @@ const postSchema = new mongoose.Schema({
       ref: "Category"
    }
    ],
-   images: [{
-      type: String
-   }],
+  
 
    createdBy: {//one to many tj.user ima vise poslova
       type: mongoose.Types.ObjectId,
       ref: 'Writer',//referenca na odredjenog USER-a,
       required: [true, 'Please provide writter']
 
-   }
+   },
+   images: [{
+      type: String
+   }]
 
 
 });
