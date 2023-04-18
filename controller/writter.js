@@ -29,5 +29,5 @@ res.status(200).json({writer});
 module.exports={
   getAllWritters,//eksportovali kao objekat
   createWriter,
-  getWriter
+  //getWriter
 };

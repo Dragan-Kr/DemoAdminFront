@@ -7,6 +7,7 @@ const express = require('express');
 const app = express();//konekcija(izmedju ostalog)
 app.use(express.json());
 const Counter = require('../model/Counter');
+var List = require("collections/list");
 
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }))
@@ -23,8 +24,6 @@ const getAllPosts = async (req, res) => {
 };
 
 
-
-
 const getPostById = async (req, res) => {
 
   const { id: postID } = req.params;
@@ -34,6 +33,26 @@ const getPostById = async (req, res) => {
   }
   res.status(200).json({ post });
 };
+
+
+
+
+
+const getPostByWriterId = async (req, res) => {
+  const { writerId } = req.query;
+  const queryObject = {};
+  if (writerId) {
+    queryObject.writerId = writerId;
+  }
+
+  console.log(queryObject);
+  const posts = await Post.find(queryObject);
+  res.status(200).json({ post });
+};
+
+
+
+
 
 
 
@@ -65,20 +84,19 @@ const createPost = async (req, res) => {
 
 
     const filePath = fs.realpathSync('uploads', []);
+    console.log("Ovo je filePath", filePath);
 
-    //  console.log("Ovo je filePath",filePath);
-    let arrayOfImagesParths = [];
+    let arrayOfImagesPaths = [];
 
     for (let index in images) {
-      let combinedPath = path2.resolve(filePath, images[index]);
-
-      arrayOfImagesParths.push(combinedPath);
-
+      console.log("Ovo su images",images)
+      // let combinedPath = path2.resolve(filePath, images[index]);
+      // let properPath = path2.join(filePath, images[index]);
+      let path = `/uploads/${images[index]}`
+      arrayOfImagesPaths.push(path);
     }
-    console.log("arrayOfImagesParths", arrayOfImagesParths)
 
-    
-
+    console.log("arrayOfImagesPaths", arrayOfImagesPaths)
     const post = new Post({
       index: seqId,
       title,
@@ -88,9 +106,10 @@ const createPost = async (req, res) => {
       postDate,
       categories,
       createdBy,
-      images:arrayOfImagesParths
+      images: arrayOfImagesPaths
     });
 
+    console.log("Post", post)
     const newPost = await post.save();
     res.status(201).json(newPost);
   } catch (err) {
@@ -100,63 +119,47 @@ const createPost = async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const createPost = (async (req, res) => {
-
-
-
-//   try {
-//     console.log(req.files, 111)
-//     console.log(req.images, 222)
-
-
-
-//     await upload.array('images');
-
-
-//     uploadImage().then(data => {
-//       console.log(data)
-//     })
-//       .catch(err => {
-//         console.log(err)
-//       })
-
-
-//     res.status(201).json({});
-
-//   } catch (err) {
-//     res.status(400).json({ message: err.message });
-//   }
-// })
-
-
 const updatePost = async (req, res) => {
   const {
-    body: { title },
+    body: { title, shortDescription, mainContent, isPublished, postDate, categories, createdBy, images },
     // writer:{writerId},
     params: { id: postId }
   } = req;
-  if (title === '') {
-    throw new BadRequestError('Title cant be empty field');
-  }
-  const post = await Post.findByIdAndUpdate({ _id: postId }, req.body, { new: true, runValidators: true });
+
+
+
+    console.log("Ovo je filePath", filePath);
+
+    let arrayOfImagesPaths = [];
+
+    for (let index in images) {
+      console.log("Ovo su images",images)
+      // let combinedPath = path2.resolve(filePath, images[index]);
+      // let properPath = path2.join(filePath, images[index]);
+      let path = `/uploads/${images[index]}`
+      arrayOfImagesPaths.push(path);
+    }
+
+
+  console.log("Ovo je arrayOfImagesPaths iz UpdatePost", arrayOfImagesPaths)
+
+
+  // console.log("Ovo je req.body.title",req.body.title)
+  const post = await Post.findByIdAndUpdate({ _id: postId }, { title: req.body.title, shortDescription: req.body.shortDescription, mainContent: req.body.mainContent, isPublished: req.body.isPublished, postDate: req.body.postDate, categories: req.body.categories, createdBy: req.body.createdBy, images: arrayOfImagesPaths }, { new: true, runValidators: true });
   if (!post) {
     throw new NotFoundError(`No post with id ${postId}`);
   }
+  if (title === '') {
+    throw new BadRequestError('Title cant be empty field');
+  }
+
+
   res.status(200).json({ post });
 };
+
+
+
+
 
 const deletePost = async (req, res) => {
   try {

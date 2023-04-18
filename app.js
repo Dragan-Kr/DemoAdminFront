@@ -10,11 +10,11 @@ app.use(express.json());//konekcija
 const bodyParser = require('body-parser');
 const multer=require('multer');
 const upload=multer({dest:'uploads/'});
-const Post = require('./model/Post');
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }));
 
-
+const Post = require('./model/Post');
+const Writer = require('./model/Writer');
 
 //routes
 const writerRouter = require('./routes/writer');
@@ -26,13 +26,17 @@ const postCategory = require('./routes/postCategory');
 
 ///
 app.use(cors());
+// app.use('get','/api/writer/:id',writerRouter);
 app.use('/api/writer',writerRouter);
+
 app.use('/api/category',categoryRouter);
 app.use('/api/post',postRouter);
 app.use('/api/postCategory',postCategory);
+
 // app.use('/api/image',imageRouter);
 
 
+app.use('/images', express.static('uploads'));
 
 
 app.post('/api/image', upload.array('images2[]'), (req, res) => {//radi
@@ -50,24 +54,17 @@ app.post('/api/image', upload.array('images2[]'), (req, res) => {//radi
 
 
 
-  // app.post('/api/image', upload.array('images2[]'), (req, res)  => {
-  //   new Promise((resolve, reject) => {
-  //     if (!req.file) {
-  //       reject({ code: 500, msg: 'err' });
-  //     } else {
-  //       resolve({ code: 200, msg: 'uploaded' });
-  //     }
-  //   })
-  //   .then((response) => {
-  //     res.send(response);
-  //   })
-  //   .catch((error) => {
-  //     res.send(error);
-  //   });
-  // });
-  
 
 
+
+app.get('/api/oneWriter:id',async(req,res)=>{
+  const {id : writerID} = req.params;
+  const writer = await Writer.findOne({_id:writerID});
+
+  if(!writer){
+    return res.status(404).json({msg: `No writer with id: ${writerID}` });
+  }
+});
   
 
 
