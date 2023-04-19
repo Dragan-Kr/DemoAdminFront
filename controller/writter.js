@@ -5,10 +5,7 @@ const getAllWritters = async (req,res)=>{
   res.status(200).json({writers});
 };
 
-const createWriter = async (req,res)=>{
-    const writer = await Writer.create(req.body);
-    res.status(201).json({writer});
-};
+
 
 const getWriter = async(req,res)=>{
   const {id : writerID} = req.params;
@@ -26,8 +23,13 @@ res.status(200).json({writer});
 
 };
 
+const createWriter = async (req,res)=>{
+  const writer = await Writer.create(req.body);
+  res.status(201).json({writer});
+};
+
 module.exports={
   getAllWritters,//eksportovali kao objekat
   createWriter,
-  //getWriter
+  getWriter
 };

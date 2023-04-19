@@ -128,7 +128,6 @@ const updatePost = async (req, res) => {
 
 
 
-    console.log("Ovo je filePath", filePath);
 
     let arrayOfImagesPaths = [];
 
