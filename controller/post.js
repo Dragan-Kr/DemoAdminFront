@@ -24,36 +24,76 @@ const getAllPosts = async (req, res) => {
 };
 
 
-const getPostById = async (req, res) => {
 
+app.use('/public', express.static(path2.join(__dirname, 'uploads'))); //public je naziv samo za korisnika
+
+// const getPostById = async (req, res) => {
+
+//   const { id: postID } = req.params;
+//   const post = await Post.findOne({ _id: postID });
+//   if (!post) {
+//     return res.status(404).json({ msg: `No post with id: ${postID}` });
+//   }
+
+//   res.status(200).json({ post });
+// };
+
+
+
+const getPostById = async (req, res) => {
   const { id: postID } = req.params;
   const post = await Post.findOne({ _id: postID });
+  
   if (!post) {
     return res.status(404).json({ msg: `No post with id: ${postID}` });
   }
-  res.status(200).json({ post });
-};
+
+  const filePath = post.images[0];
+  console.log("filePath",filePath)
+  const fileName = path2.basename(filePath);
+  console.log("FileName",fileName)
+
+  console.log("__dirname",__dirname)
+  // Set the headers to force download the file
+  res.set({
+    'Content-Disposition': `attachment; filename="${fileName}"`,
+    'Content-Type': 'application/octet-stream'
+  });
+// console.log("RES",res)
+
+const filePath2 = fs.realpathSync('uploads', []);
+console.log("Ovo je filePath od upload direktorijuma", filePath2);
+
+
+let fullFilePath = path2.join( `${filePath2}`,`${fileName}`);
+// let path = `/uploads/${images[index]}`
+console.log("FullFilePath",fullFilePath);
 
 
 
 
 
-const getPostByWriterId = async (req, res) => {
-  const { writerId } = req.query;
-  const queryObject = {};
-  if (writerId) {
-    queryObject.writerId = writerId;
+const fileData = fs.readFileSync(fullFilePath);
+console.log("FileData",fileData)
+
+
+// Create a response object containing the post and file data
+const response = {
+  post: post.toObject(),
+  file: {
+    name: fileName,
+    data: fileData.toString('base64')
   }
-
-  console.log(queryObject);
-  const posts = await Post.find(queryObject);
-  res.status(200).json({ post });
 };
 
+// Send the response
+res.send(response);
+  // Send the file
+// res.sendFile(path2.join(filePath2,fileName));
 
 
-
-
+  
+};
 
 
 
@@ -79,8 +119,6 @@ const createPost = async (req, res) => {
       seqId = counter.seq;
     }
     /////////////
-
-
 
 
     const filePath = fs.realpathSync('uploads', []);
@@ -116,7 +154,6 @@ const createPost = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
-
 
 
 const updatePost = async (req, res) => {
@@ -184,7 +221,6 @@ module.exports = {
   getPostById,
   createPost,
   updatePost,
-  deletePost,
+  deletePost
   // uploadImage,
-
 };

@@ -9,7 +9,25 @@ app.use(express.json());//konekcija
 
 const bodyParser = require('body-parser');
 const multer=require('multer');
-const upload=multer({dest:'uploads/'});
+
+
+// const upload=multer({dest:'uploads/',filename: function(req, file, cb) {
+//   cb(null, file.fieldname + '-' + Date.now() + '-' + file.originalname)
+// }});
+
+
+var storage = multer.diskStorage({
+  destination:(req,file,cb)=>{
+    cb(null,'uploads/')
+  },
+  filename:(req,file,cb)=>{
+    cb(null,file.originalname)
+  }
+})
+
+var upload = multer({storage:storage});
+
+
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }));
 
@@ -39,22 +57,14 @@ app.use('/images', express.static('uploads'));
 
 app.post('/api/image', upload.array('images2[]'), (req, res) => {//radi
 
-
-
     if (!req.file) {
       res.send({ code: 500, msg: 'err' });
     } else {
+      console.log("Res.file",req.file)
       res.send({ code: 200, msg: 'uploaded' });
     }
    
   });
-
-
-
-
-
-
-
 
 
 const port = process.env.PORT || 8000;
