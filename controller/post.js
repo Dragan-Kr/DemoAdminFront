@@ -80,7 +80,13 @@ console.log("FileData",fileData)
 // Create a response object containing the post and file data
 const response = {
   post: post.toObject(),
+ 
   file: {
+    // name: fileName,
+    data:"data:" + "image/jpeg" + ";"+ "base64," + fileData.toString('base64')
+  },
+
+  file2: {
     name: fileName,
     data: fileData.toString('base64')
   }
@@ -165,16 +171,31 @@ const updatePost = async (req, res) => {
 
 
 
+  const tempPost = await Post.findOne({ _id: postId });
+
+   
+
 
     let arrayOfImagesPaths = [];
 
+    // for (let index in tempPost.images){
+    //   console.log("Ovo su images",images)
+      
+    //   let path = `/uploads/${images[index]}`
+    //   arrayOfImagesPaths.push(path);
+    // } 
+
+
     for (let index in images) {
-      console.log("Ovo su images",images)
-      // let combinedPath = path2.resolve(filePath, images[index]);
-      // let properPath = path2.join(filePath, images[index]);
+      console.log("Ovo su images",images);
       let path = `/uploads/${images[index]}`
       arrayOfImagesPaths.push(path);
     }
+
+    const concatArr = tempPost.images.concat(images)
+
+
+
 
 
   console.log("Ovo je arrayOfImagesPaths iz UpdatePost", arrayOfImagesPaths)
