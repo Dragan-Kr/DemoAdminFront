@@ -40,69 +40,122 @@ app.use('/public', express.static(path2.join(__dirname, 'uploads'))); //public j
 
 
 
+// const getPostById = async (req, res) => {
+//   const { id: postID } = req.params;
+//   const post = await Post.findOne({ _id: postID });
+
+//   if (!post) {
+//     return res.status(404).json({ msg: `No post with id: ${postID}` });
+//   }
+
+//   const filePath = post.images[0];
+//   console.log("filePath", filePath)
+//   const fileName = path2.basename(filePath);
+//   console.log("FileName", fileName)
+
+//   console.log("__dirname", __dirname)
+//   // Set the headers to force download the file
+//   res.set({
+//     'Content-Disposition': `attachment; filename="${fileName}"`,
+//     'Content-Type': 'application/octet-stream'
+//   });
+//   // console.log("RES",res)
+
+//   const filePath2 = fs.realpathSync('uploads', []);
+//   console.log("Ovo je filePath od upload direktorijuma", filePath2);
+
+
+//   let fullFilePath = path2.join(`${filePath2}`, `${fileName}`);
+//   // let path = `/uploads/${images[index]}`
+//   console.log("FullFilePath", fullFilePath);
+
+//   const fileData = fs.readFileSync(fullFilePath);
+//   console.log("FileData", fileData)
+
+
+//   // Create a response object containing the post and file data
+//   const response = {
+//     post: post.toObject(),
+
+//     file: {
+//       // name: fileName,
+//       data: "data:" + "image/jpeg" + ";" + "base64," + fileData.toString('base64')
+//     },
+
+//     file2: {
+//       name: fileName,
+//       data: fileData.toString('base64')
+//     }
+//   };
+
+//   // Send the response
+//   res.send(response);
+//   // Send the file
+//   // res.sendFile(path2.join(filePath2,fileName));
+// };
+
+
+
+
+///////////////////////////////////////////////////////////
 const getPostById = async (req, res) => {
   const { id: postID } = req.params;
   const post = await Post.findOne({ _id: postID });
-  
+
   if (!post) {
     return res.status(404).json({ msg: `No post with id: ${postID}` });
   }
 
-  const filePath = post.images[0];
-  console.log("filePath",filePath)
-  const fileName = path2.basename(filePath);
-  console.log("FileName",fileName)
 
-  console.log("__dirname",__dirname)
-  // Set the headers to force download the file
+
+  let objectArray = [];
+
+
+  for (let index in post.images) {
+
+    const imageObject = imageFunct(post, post.images[index]);
+    objectArray.push(imageObject)
+
+
+  }
+
+
+  
+  // Send the response
+  res.send(response);
+  // Send the file
+  // res.sendFile(path2.join(filePath2,fileName));
+};
+
+
+
+imageFunct = (post, image) => {
+  const filePath = image;
+  const fileName = path2.basename(filePath);
   res.set({
     'Content-Disposition': `attachment; filename="${fileName}"`,
     'Content-Type': 'application/octet-stream'
   });
-// console.log("RES",res)
+  const filePath2 = fs.realpathSync('uploads', []);
 
-const filePath2 = fs.realpathSync('uploads', []);
-console.log("Ovo je filePath od upload direktorijuma", filePath2);
+  let fullFilePath = path2.join(`${filePath2}`, `${fileName}`);
+  const fileData = fs.readFileSync(fullFilePath);
+  const response = {
+    post: post.toObject(),
 
+    file: {
+      // name: fileName,
+      data: "data:" + "image/jpeg" + ";" + "base64," + fileData.toString('base64')
+    },
 
-let fullFilePath = path2.join( `${filePath2}`,`${fileName}`);
-// let path = `/uploads/${images[index]}`
-console.log("FullFilePath",fullFilePath);
+    file2: {
+      name: fileName,
+      data: fileData.toString('base64')
+    }
+  };
+  res.send(response);
 
-
-
-
-
-const fileData = fs.readFileSync(fullFilePath);
-console.log("FileData",fileData)
-
-
-// Create a response object containing the post and file data
-const response = {
-  post: post.toObject(),
- 
-  file: {
-    // name: fileName,
-    data:"data:" + "image/jpeg" + ";"+ "base64," + fileData.toString('base64')
-  },
-
-  file2: {
-    name: fileName,
-    data: fileData.toString('base64')
-  }
-};
-
-// Send the response
-res.send(response);
-  // Send the file
-// res.sendFile(path2.join(filePath2,fileName));
-
-
-  
-};
-
-
-
+}
 
 const createPost = async (req, res) => {
 
@@ -133,7 +186,7 @@ const createPost = async (req, res) => {
     let arrayOfImagesPaths = [];
 
     for (let index in images) {
-      console.log("Ovo su images",images)
+      console.log("Ovo su images", images)
       // let combinedPath = path2.resolve(filePath, images[index]);
       // let properPath = path2.join(filePath, images[index]);
       let path = `/uploads/${images[index]}`
@@ -173,26 +226,26 @@ const updatePost = async (req, res) => {
 
   const tempPost = await Post.findOne({ _id: postId });
 
-   
 
 
-    let arrayOfImagesPaths = [];
 
-    // for (let index in tempPost.images){
-    //   console.log("Ovo su images",images)
-      
-    //   let path = `/uploads/${images[index]}`
-    //   arrayOfImagesPaths.push(path);
-    // } 
+  let arrayOfImagesPaths = [];
+
+  // for (let index in tempPost.images){
+  //   console.log("Ovo su images",images)
+
+  //   let path = `/uploads/${images[index]}`
+  //   arrayOfImagesPaths.push(path);
+  // } 
 
 
-    for (let index in images) {
-      console.log("Ovo su images",images);
-      let path = `/uploads/${images[index]}`
-      arrayOfImagesPaths.push(path);
-    }
+  for (let index in images) {
+    console.log("Ovo su images", images);
+    let path = `/uploads/${images[index]}`
+    arrayOfImagesPaths.push(path);
+  }
 
-    const concatArr = tempPost.images.concat(images)
+  const concatArr = tempPost.images.concat(images)
 
 
 
