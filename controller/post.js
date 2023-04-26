@@ -16,11 +16,26 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 5
 const fs = require('fs')
 // const path = require('node:path'); 
 var path2 = require('path');
+
+
+
+
 const getAllPosts = async (req, res) => {
-
   const posts = await Post.find({});
-  res.status(200).json({ posts });
 
+
+ // get page from query params or default to first page
+ const page = parseInt(req.query.page) || 1;
+ 
+ // get pager object for specified page
+ const pageSize = 5;
+ const pager = paginate(posts.length, page, pageSize);
+
+ // get page of items from items array
+ const pageOfPosts = posts.slice(pager.startIndex, pager.endIndex + 1);
+
+ // return pager object and current page of items
+ return res.status(200).json({ pager, pageOfPosts });
 };
 
 
@@ -106,25 +121,28 @@ const getPostById = async (req, res) => {
     return res.status(404).json({ msg: `No post with id: ${postID}` });
   }
 
+  // res.set({
+  //   'Content-Disposition': `attachment; filename="${fileName}"`,
+  //   'Content-Type': 'application/octet-stream'
+  // });
 
 
-  let objectArray = [];
-
-
+  if(post.images.length>0) { 
+  let responseArray = [];
   for (let index in post.images) {
 
-    const imageObject = imageFunct(post, post.images[index]);
-    objectArray.push(imageObject)
+    let response = imageFunct(post, post.images[index]);
 
-
+    responseArray.push(response);
   }
-
+  //console.log("Ovo je responseArray",responseArray)
 
   
   // Send the response
-  res.send(response);
-  // Send the file
-  // res.sendFile(path2.join(filePath2,fileName));
+  res.send(responseArray);
+  }else{
+    res.status(200).json({post});
+  }
 };
 
 
@@ -132,10 +150,7 @@ const getPostById = async (req, res) => {
 imageFunct = (post, image) => {
   const filePath = image;
   const fileName = path2.basename(filePath);
-  res.set({
-    'Content-Disposition': `attachment; filename="${fileName}"`,
-    'Content-Type': 'application/octet-stream'
-  });
+  
   const filePath2 = fs.realpathSync('uploads', []);
 
   let fullFilePath = path2.join(`${filePath2}`, `${fileName}`);
@@ -153,7 +168,7 @@ imageFunct = (post, image) => {
       data: fileData.toString('base64')
     }
   };
-  res.send(response);
+ return response;
 
 }
 
