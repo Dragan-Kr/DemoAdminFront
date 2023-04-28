@@ -19,23 +19,80 @@ var path2 = require('path');
 
 
 
+// const getAllPosts = async (req, res) => {
+//   const posts = await Post.find({});
+//   return res.status(200).json({ posts });
+//  }
+
+
+
+
 
 const getAllPosts = async (req, res) => {
-  const posts = await Post.find({});
+
+  let page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+  // const endIndex = (page - 1) * limit +limit; //ovako je na frontu nekaed bilo
 
 
- // get page from query params or default to first page
- const page = parseInt(req.query.page) || 1;
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder || 'asc';
+
+  const searchTerm = req.query.searchTerm || '';
+  let skip = (page - 1) * limit;;
+  let data = await Post.find({}).limit(limit).skip(skip);// fetch data from a database or other source
  
- // get pager object for specified page
- const pageSize = 5;
- const pager = paginate(posts.length, page, pageSize);
+  let allDataLength = (await Post.find({})).length;
+  // console.log("DATA", data.length)
 
- // get page of items from items array
- const pageOfPosts = posts.slice(pager.startIndex, pager.endIndex + 1);
+  // data = data.slice(startIndex, endIndex)
 
- // return pager object and current page of items
- return res.status(200).json({ pager, pageOfPosts });
+
+  if (searchTerm != '') {
+    console.log("SEARCH TERM", searchTerm)
+    let allData = await Post.find({});
+    data = allData.filter(item => {
+
+      return item.title.toLowerCase().includes(searchTerm.toLowerCase())
+
+    });
+    allDataLength = data.length;
+
+  }
+
+
+  if (sortField.length > 0) { //radi na beku
+    console.log("USO U DRUGI IF")
+    const sortedData = data.sort((a, b) => {
+      const aVal = a[sortField];
+      const bVal = b[sortField];
+      if (aVal < bVal) {
+        return sortOrder === 'asc' ? -1 : 1;
+      }
+      if (aVal > bVal) {
+        return sortOrder === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+
+    console.log("SORTED DATA",sortedData)
+
+    const results = sortedData.slice(startIndex, endIndex);
+    console.log("Results",results)
+
+    data = results;
+    
+  }
+
+
+  res.json({
+    data: data,
+    page: page,
+    totalPages: Math.ceil(data.length / limit),//ovde problem
+    allDataLength: allDataLength
+  });
 };
 
 
@@ -127,21 +184,21 @@ const getPostById = async (req, res) => {
   // });
 
 
-  if(post.images.length>0) { 
-  let responseArray = [];
-  for (let index in post.images) {
+  if (post.images.length > 0) {
+    let responseArray = [];
+    for (let index in post.images) {
 
-    let response = imageFunct(post, post.images[index]);
+      let response = imageFunct(post, post.images[index]);
 
-    responseArray.push(response);
-  }
-  //console.log("Ovo je responseArray",responseArray)
+      responseArray.push(response);
+    }
+    //console.log("Ovo je responseArray",responseArray)
 
-  
-  // Send the response
-  res.send(responseArray);
-  }else{
-    res.status(200).json({post});
+
+    // Send the response
+    res.send(responseArray);
+  } else {
+    res.status(200).json({ post });
   }
 };
 
@@ -150,7 +207,7 @@ const getPostById = async (req, res) => {
 imageFunct = (post, image) => {
   const filePath = image;
   const fileName = path2.basename(filePath);
-  
+
   const filePath2 = fs.realpathSync('uploads', []);
 
   let fullFilePath = path2.join(`${filePath2}`, `${fileName}`);
@@ -168,7 +225,7 @@ imageFunct = (post, image) => {
       data: fileData.toString('base64')
     }
   };
- return response;
+  return response;
 
 }
 
