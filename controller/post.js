@@ -16,15 +16,7 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 5
 const fs = require('fs')
 // const path = require('node:path'); 
 var path2 = require('path');
-
-
-
-// const getAllPosts = async (req, res) => {
-//   const posts = await Post.find({});
-//   return res.status(200).json({ posts });
-//  }
-
-
+const { Console } = require('console');
 
 
 
@@ -37,35 +29,32 @@ const getAllPosts = async (req, res) => {
   // const endIndex = (page - 1) * limit +limit; //ovako je na frontu nekaed bilo
 
 
-  const sortField = req.query.sortField;
+  const sortField = req.query.sortField || "index";
   const sortOrder = req.query.sortOrder || 'asc';
-
+  console.log("SORT ORDER",sortOrder)
   const searchTerm = req.query.searchTerm || '';
-  let skip = (page - 1) * limit;;
-  let data = await Post.find({}).limit(limit).skip(skip);// fetch data from a database or other source
+  let skip = (page - 1) * limit;
+  // let data = await Post.find({}).limit(limit).skip(skip);// fetch data from a database or other source
  
-  let allDataLength = (await Post.find({})).length;
-  // console.log("DATA", data.length)
 
-  // data = data.slice(startIndex, endIndex)
+
+  let data = await Post.find({})
+  let allDataLength = (await Post.find({})).length;
+
 
 
   if (searchTerm != '') {
     console.log("SEARCH TERM", searchTerm)
     let allData = await Post.find({});
     data = allData.filter(item => {
-
       return item.title.toLowerCase().includes(searchTerm.toLowerCase())
-
     });
     allDataLength = data.length;
-
   }
 
-
-  if (sortField.length > 0) { //radi na beku
-    console.log("USO U DRUGI IF")
-    const sortedData = data.sort((a, b) => {
+  if (sortField.length > 0) { 
+     console.log("USO U DRUGI IF")
+     const sortedData = data.sort((a, b) => {
       const aVal = a[sortField];
       const bVal = b[sortField];
       if (aVal < bVal) {
@@ -77,7 +66,6 @@ const getAllPosts = async (req, res) => {
       return 0;
     });
 
-    console.log("SORTED DATA",sortedData)
 
     const results = sortedData.slice(startIndex, endIndex);
     console.log("Results",results)
@@ -87,10 +75,28 @@ const getAllPosts = async (req, res) => {
   }
 
 
+  if (endIndex < data.length) {
+    data.next = {
+      page: page + 1,
+      limit: limit
+    };
+  }
+
+  if (startIndex > 0) {
+    data.previous = {
+      page: page - 1,
+      limit: limit
+    };
+  }
+
+
+  // data = data.slice(startIndex, endIndex);
+  console.log("DATA BEFORE SENDING",data)
+
   res.json({
     data: data,
     page: page,
-    totalPages: Math.ceil(data.length / limit),//ovde problem
+    totalPages: Math.ceil(allDataLength / limit),//ovde problem
     allDataLength: allDataLength
   });
 };
@@ -226,7 +232,6 @@ imageFunct = (post, image) => {
     }
   };
   return response;
-
 }
 
 const createPost = async (req, res) => {
@@ -266,6 +271,23 @@ const createPost = async (req, res) => {
     }
 
     console.log("arrayOfImagesPaths", arrayOfImagesPaths)
+    console.log("Tip postDate je",typeof postDate)
+    
+
+
+   let date= new Date();
+console.log("DATE",date)
+    // get current hours
+let hours = date.getHours();
+console.log("HOURS",hours)
+// // get current minutes
+let minutes = date.getMinutes();
+
+// // get current seconds
+let hoursAndMinutes =  hours + ":" + minutes;
+console.log("hoursAndSeconds",hoursAndMinutes);l
+// let time = Number()
+// console.log("Hours",hours)
     const post = new Post({
       index: seqId,
       title,
