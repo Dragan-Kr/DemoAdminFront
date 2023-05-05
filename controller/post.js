@@ -31,11 +31,11 @@ const getAllPosts = async (req, res) => {
 
   const sortField = req.query.sortField || "index";
   const sortOrder = req.query.sortOrder || 'asc';
-  console.log("SORT ORDER",sortOrder)
+  console.log("SORT ORDER", sortOrder)
   const searchTerm = req.query.searchTerm || '';
   let skip = (page - 1) * limit;
   // let data = await Post.find({}).limit(limit).skip(skip);// fetch data from a database or other source
- 
+
 
 
   let data = await Post.find({})
@@ -52,9 +52,9 @@ const getAllPosts = async (req, res) => {
     allDataLength = data.length;
   }
 
-  if (sortField.length > 0) { 
-     console.log("USO U DRUGI IF")
-     const sortedData = data.sort((a, b) => {
+  if (sortField.length > 0) {
+    console.log("USO U DRUGI IF")
+    const sortedData = data.sort((a, b) => {
       const aVal = a[sortField];
       const bVal = b[sortField];
       if (aVal < bVal) {
@@ -68,10 +68,10 @@ const getAllPosts = async (req, res) => {
 
 
     const results = sortedData.slice(startIndex, endIndex);
-    console.log("Results",results)
+    // console.log("Results", results)
 
     data = results;
-    
+
   }
 
 
@@ -90,8 +90,7 @@ const getAllPosts = async (req, res) => {
   }
 
 
-  // data = data.slice(startIndex, endIndex);
-  console.log("DATA BEFORE SENDING",data)
+  // console.log("DATA BEFORE SENDING", data)
 
   res.json({
     data: data,
@@ -105,53 +104,69 @@ const getAllPosts = async (req, res) => {
 
 app.use('/public', express.static(path2.join(__dirname, 'uploads'))); //public je naziv samo za korisnika
 
-// const getPostById = async (req, res) => {
 
+
+
+
+const getPostById=async(req,res)=>{
+
+  const {id:postID}= req.params;
+  const post=await Post.findOne({_id:postID});
+
+  if(!post){
+    return res.status(404).json({msg:`No post with id:${postID}`});
+  }
+
+  res.status(200).json({post});
+}
+
+
+/////////////////////////////////////////////////////////
+// const getPostById = async (req, res) => {
 //   const { id: postID } = req.params;
 //   const post = await Post.findOne({ _id: postID });
+
 //   if (!post) {
 //     return res.status(404).json({ msg: `No post with id: ${postID}` });
 //   }
 
-//   res.status(200).json({ post });
+//   // res.set({
+//   //   'Content-Disposition': `attachment; filename="${fileName}"`,
+//   //   'Content-Type': 'application/octet-stream'
+//   // });
+
+//   console.log("Post images",post.images)
+//   if (post.images.length > 0) {
+//     let responseArray = [];
+//     for (let index in post.images) {
+
+//       let response = imageFunct(post, post.images[index]);
+
+//       responseArray.push(response);
+//     }
+//     console.log("Ovo je responseArray",responseArray)
+
+
+//     // Send the response
+//     res.send(responseArray);
+//   } else {
+//     res.status(200).json({ post });
+//   }
 // };
 
 
 
-// const getPostById = async (req, res) => {
-//   const { id: postID } = req.params;
-//   const post = await Post.findOne({ _id: postID });
+// imageFunct = (post, image) => {
+//   console.log("imageFunct->post",post)
+//   console.log("imageFunct->image",image)
 
-//   if (!post) {
-//     return res.status(404).json({ msg: `No post with id: ${postID}` });
-//   }
-
-//   const filePath = post.images[0];
-//   console.log("filePath", filePath)
+//   const filePath = image;
 //   const fileName = path2.basename(filePath);
-//   console.log("FileName", fileName)
-
-//   console.log("__dirname", __dirname)
-//   // Set the headers to force download the file
-//   res.set({
-//     'Content-Disposition': `attachment; filename="${fileName}"`,
-//     'Content-Type': 'application/octet-stream'
-//   });
-//   // console.log("RES",res)
 
 //   const filePath2 = fs.realpathSync('uploads', []);
-//   console.log("Ovo je filePath od upload direktorijuma", filePath2);
-
 
 //   let fullFilePath = path2.join(`${filePath2}`, `${fileName}`);
-//   // let path = `/uploads/${images[index]}`
-//   console.log("FullFilePath", fullFilePath);
-
 //   const fileData = fs.readFileSync(fullFilePath);
-//   console.log("FileData", fileData)
-
-
-//   // Create a response object containing the post and file data
 //   const response = {
 //     post: post.toObject(),
 
@@ -165,79 +180,17 @@ app.use('/public', express.static(path2.join(__dirname, 'uploads'))); //public j
 //       data: fileData.toString('base64')
 //     }
 //   };
-
-//   // Send the response
-//   res.send(response);
-//   // Send the file
-//   // res.sendFile(path2.join(filePath2,fileName));
-// };
+//   return response;
+// }
 
 
 
-
-///////////////////////////////////////////////////////////
-const getPostById = async (req, res) => {
-  const { id: postID } = req.params;
-  const post = await Post.findOne({ _id: postID });
-
-  if (!post) {
-    return res.status(404).json({ msg: `No post with id: ${postID}` });
-  }
-
-  // res.set({
-  //   'Content-Disposition': `attachment; filename="${fileName}"`,
-  //   'Content-Type': 'application/octet-stream'
-  // });
-
-
-  if (post.images.length > 0) {
-    let responseArray = [];
-    for (let index in post.images) {
-
-      let response = imageFunct(post, post.images[index]);
-
-      responseArray.push(response);
-    }
-    //console.log("Ovo je responseArray",responseArray)
-
-
-    // Send the response
-    res.send(responseArray);
-  } else {
-    res.status(200).json({ post });
-  }
-};
-
-
-
-imageFunct = (post, image) => {
-  const filePath = image;
-  const fileName = path2.basename(filePath);
-
-  const filePath2 = fs.realpathSync('uploads', []);
-
-  let fullFilePath = path2.join(`${filePath2}`, `${fileName}`);
-  const fileData = fs.readFileSync(fullFilePath);
-  const response = {
-    post: post.toObject(),
-
-    file: {
-      // name: fileName,
-      data: "data:" + "image/jpeg" + ";" + "base64," + fileData.toString('base64')
-    },
-
-    file2: {
-      name: fileName,
-      data: fileData.toString('base64')
-    }
-  };
-  return response;
-}
-
+/////////////////////////////
 const createPost = async (req, res) => {
 
   try {
     const { title, shortDescription, mainContent, isPublished, postDate, categories, createdBy, images } = req.body;
+    console.log("CREATE POST->IMAGES",images)
     //////////
     const counter = await Counter.findOneAndUpdate(
       { index: "autoval" },
@@ -271,23 +224,22 @@ const createPost = async (req, res) => {
     }
 
     console.log("arrayOfImagesPaths", arrayOfImagesPaths)
-    console.log("Tip postDate je",typeof postDate)
-    
+    console.log("Tip postDate je", typeof postDate)
 
 
-   let date= new Date();
-console.log("DATE",date)
+    let date = new Date();
+    // console.log("DATE", date)
     // get current hours
-let hours = date.getHours();
-console.log("HOURS",hours)
-// // get current minutes
-let minutes = date.getMinutes();
+    let hours = date.getHours();
+    console.log("HOURS", hours)
+    // // get current minutes
+    let minutes = date.getMinutes();
 
-// // get current seconds
-let hoursAndMinutes =  hours + ":" + minutes;
-console.log("hoursAndSeconds",hoursAndMinutes);l
-// let time = Number()
-// console.log("Hours",hours)
+    // // get current seconds
+    let hoursAndMinutes = hours + ":" + minutes;
+    // console.log("hoursAndMinutes", hoursAndMinutes);
+    // let time = Number()
+    // console.log("Hours",hours)
     const post = new Post({
       index: seqId,
       title,
@@ -297,16 +249,20 @@ console.log("hoursAndSeconds",hoursAndMinutes);l
       postDate,
       categories,
       createdBy,
-      images: arrayOfImagesPaths
+      images,
+      time:hoursAndMinutes
     });
 
-    console.log("Post", post)
+    //console.log("Post", post)
     const newPost = await post.save();
     res.status(201).json(newPost);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
+
+
+
 
 
 const updatePost = async (req, res) => {
@@ -316,23 +272,11 @@ const updatePost = async (req, res) => {
     params: { id: postId }
   } = req;
 
-
-
   const tempPost = await Post.findOne({ _id: postId });
-
-
+  console.log("UPDATE POST->IMAGES",images)
 
 
   let arrayOfImagesPaths = [];
-
-  // for (let index in tempPost.images){
-  //   console.log("Ovo su images",images)
-
-  //   let path = `/uploads/${images[index]}`
-  //   arrayOfImagesPaths.push(path);
-  // } 
-
-
   for (let index in images) {
     console.log("Ovo su images", images);
     let path = `/uploads/${images[index]}`
@@ -341,15 +285,11 @@ const updatePost = async (req, res) => {
 
   const concatArr = tempPost.images.concat(images)
 
-
-
-
-
   console.log("Ovo je arrayOfImagesPaths iz UpdatePost", arrayOfImagesPaths)
 
 
   // console.log("Ovo je req.body.title",req.body.title)
-  const post = await Post.findByIdAndUpdate({ _id: postId }, { title: req.body.title, shortDescription: req.body.shortDescription, mainContent: req.body.mainContent, isPublished: req.body.isPublished, postDate: req.body.postDate, categories: req.body.categories, createdBy: req.body.createdBy, images: arrayOfImagesPaths }, { new: true, runValidators: true });
+  const post = await Post.findByIdAndUpdate({ _id: postId }, { title: req.body.title, shortDescription: req.body.shortDescription, mainContent: req.body.mainContent, isPublished: req.body.isPublished, postDate: req.body.postDate, categories: req.body.categories, createdBy: req.body.createdBy, images: req.body.images }, { new: true, runValidators: true });
   if (!post) {
     throw new NotFoundError(`No post with id ${postId}`);
   }

@@ -47,7 +47,10 @@ const postSchema = new mongoose.Schema({
    },
    images: [{
       type: String
-   }]
+   }],
+   time:{
+      type:String
+   }
 
 
 });

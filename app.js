@@ -52,10 +52,13 @@ app.use('/api/postCategory',postCategory);
 
 
 
-app.use('/images', express.static('uploads'));
+//http://localhost:8000/images/image1.jpg --pristup slici
+//kada stavim uploads umjesto images radi link od slika u postmanu
+
+app.use('/uploads', express.static('uploads'));
 
 
-app.post('/api/image', upload.array('images2[]'), (req, res) => {//radi
+app.post('/api/image', upload.array('images2'), (req, res) => {//OZNACENO
 
     if (!req.file) {
       res.send({ code: 500, msg: 'err' });
@@ -65,6 +68,16 @@ app.post('/api/image', upload.array('images2[]'), (req, res) => {//radi
     }
    
   });
+
+  //NA TUTORIALU OVAKO
+  // app.post("/api/upload",upload.single("file"),(req,res)=>{
+  //   const file = req.file;
+  //   res.status(200).json(file.filename);
+  // })
+
+
+
+
 
 
 const port = process.env.PORT || 8000;
