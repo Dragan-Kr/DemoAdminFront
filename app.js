@@ -10,6 +10,10 @@ app.use(express.json());//konekcija
 const bodyParser = require('body-parser');
 const multer=require('multer');
 
+const writerRouter = require('./routes/writer');
+const categoryRouter = require('./routes/category');
+const postRouter = require('./routes/post');
+const postCategory = require('./routes/postCategory');
 
 // const upload=multer({dest:'uploads/',filename: function(req, file, cb) {
 //   cb(null, file.fieldname + '-' + Date.now() + '-' + file.originalname)
@@ -28,18 +32,15 @@ var storage = multer.diskStorage({
 var upload = multer({storage:storage});
 
 
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }));
+app.use(bodyParser.json({ limit: '256mb' }));
+app.use(bodyParser.urlencoded({ limit: '256', extended: true, parameterLimit: 50000 }));
 
 // app.use(express.static(__dirname + '/public'));
 const Post = require('./model/Post');
 const Writer = require('./model/Writer');
 
 //routes
-const writerRouter = require('./routes/writer');
-const categoryRouter = require('./routes/category');
-const postRouter = require('./routes/post');
-const postCategory = require('./routes/postCategory');
+
 // const imageRouter = require('./routes/postCategory');
 
 
@@ -58,13 +59,13 @@ app.use('/api/postCategory',postCategory);
 app.use('/uploads', express.static('uploads'));
 
 
-app.post('/api/image', upload.array('images2'), (req, res) => {//OZNACENO
+app.post('/api/image', upload.array('pro-image',20), (req, res) => {//OZNACENO
 
     if (!req.file) {
       res.send({ code: 500, msg: 'err' });
     } else {
       console.log("Res.file",req.file)
-      res.send({ code: 200, msg: 'uploaded' });
+      res.send({ code: 200, msg: 'uploaded' })
     }
    
   });

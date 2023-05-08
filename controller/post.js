@@ -1,27 +1,23 @@
 const { json } = require('express');
 const Post = require('../model/Post');
-const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
 const bodyParser = require('body-parser');
 const express = require('express');
 const app = express();//konekcija(izmedju ostalog)
 app.use(express.json());
 const Counter = require('../model/Counter');
-var List = require("collections/list");
+// var List = require("collections/list");
 
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }))
+// app.use(bodyParser.json({ limit: '50mb' }));
+// app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }))
 // app.use(bodyParser.urlencoded({extended:false}));
 // const Fs = require('@supercharge/fs')
 const fs = require('fs')
-// const path = require('node:path'); 
 var path2 = require('path');
-const { Console } = require('console');
 
+app.use('/public', express.static(path2.join(__dirname, 'uploads'))); //public je naziv samo za korisnika
 
 
 const getAllPosts = async (req, res) => {
-
   let page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 5;
   const startIndex = (page - 1) * limit;
@@ -102,7 +98,6 @@ const getAllPosts = async (req, res) => {
 
 
 
-app.use('/public', express.static(path2.join(__dirname, 'uploads'))); //public je naziv samo za korisnika
 
 
 
