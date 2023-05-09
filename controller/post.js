@@ -106,12 +106,30 @@ const getAllPosts = async (req, res) => {
 const getPostById=async(req,res)=>{
 
   const {id:postID}= req.params;
+  
   const post=await Post.findOne({_id:postID});
 
   if(!post){
     return res.status(404).json({msg:`No post with id:${postID}`});
   }
+  
+  const fs = require('fs');
 
+  const imageArr = post.images;
+  console.log("FS",fs)
+
+  for(let image of imageArr){
+    
+    console.log("IMAGE",image)
+
+    if (fs.existsSync(image)) {
+      console.log('file exists');
+    } else {
+      console.log('file not found!');
+    }
+    
+  }
+ 
   res.status(200).json({post});
 }
 

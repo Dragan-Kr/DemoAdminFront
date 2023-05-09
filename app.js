@@ -59,8 +59,7 @@ app.use('/api/postCategory',postCategory);
 app.use('/uploads', express.static('uploads'));
 
 
-app.post('/api/image', upload.array('pro-image',20), (req, res) => {//OZNACENO
-
+app.post('/api/image', upload.array('images2',20), (req, res) => {//OZNACENO
     if (!req.file) {
       res.send({ code: 500, msg: 'err' });
     } else {
