@@ -17,12 +17,17 @@
     "date-fns": "^2.29.3",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "helmet": "^7.0.0",
+    "http-status-codes": "^2.2.0",
+    "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.0.1",
     "mongoose-auto-increment": "^5.0.1",
     "multer": "^1.4.5-lts.1",
     "node-path": "0.0.3",
     "nodemon": "^2.0.22",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "xss-clean": "^0.1.1"
   },
   "jshintConfig": {
     "esversion": 9
