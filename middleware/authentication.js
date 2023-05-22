@@ -2,7 +2,7 @@
 
 
 // const User = require('../../models/User');
-const User = require('../model/Writer');
+const User = require('../model/User');
 
 const jwt = require('jsonwebtoken');
 const {UnauthenthicatedError} = require('../../errors');
@@ -19,7 +19,7 @@ try {
     //attach user to job routes
     const user = User.findById(payload.id).select('-password');
     req.user =  user;
-    req.user = {userId:payload.userId,name:payload.name};
+    req.user = {userId:payload.userId,userName:payload.userName};
 next();
 } catch (error) {
     throw new UnauthenthicatedError('Authentication invalid');

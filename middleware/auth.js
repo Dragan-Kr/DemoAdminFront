@@ -15,8 +15,8 @@ const authentificationMiddleware = async(req,res,next)=>{
         console.log(decoded);
         // const luckyNumber = Math.floor(Math.random() * 100);
         // res.status(200).json({msg:`Hello ${decoded.username}`,secret:`Here is your authorized data,your lucky number is ${luckyNumber}`});
-        const {id,username} = decoded;
-        req.user = {id,username};
+        const {id,userName} = decoded;
+        req.user = {id,userName};
         next();
 
 

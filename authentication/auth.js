@@ -1,6 +1,6 @@
 //7:44
 
-const User = require('../model/Writer')
+const User = require('../model/User')
 const {StatusCodes} = require('http-status-codes');
 const {BadRequestError,UnauthenthicatedError} = require('../controller/errors');
 
@@ -23,7 +23,7 @@ const register = async (req,res)=>{
 
     
     // const token = jwt.sign({userId:user._id,name:user.name},'jwtSecret',{expiresIn:'30d'});//_id je atribut u moongodb
-    res.status(StatusCodes.CREATED).json({user:{name:user.name},token});
+    res.status(StatusCodes.CREATED).json({user:{userName:user.userName},token});
 };
 
 const login = async (req,res)=>{
@@ -45,7 +45,7 @@ const login = async (req,res)=>{
         throw new UnauthenthicatedError('Invalid Credentials');
     }
     const token = user.createJWT();
-    res.status(StatusCodes.OK).json({user:{name:user.name},token});
+    res.status(StatusCodes.OK).json({user:{userName:user.userName},token});
 
 };
 
