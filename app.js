@@ -25,6 +25,12 @@ const authRouter = require('./routes/auth');
 const mainRouter =require('./routes/main');
 
 
+
+//email
+
+const sendEmail =require("./controller/email")
+
+app.get('/api/send', sendEmail);
 // const upload=multer({dest:'uploads/',filename: function(req, file, cb) {
 //   cb(null, file.fieldname + '-' + Date.now() + '-' + file.originalname)
 // }});
@@ -59,7 +65,7 @@ const errorMiddleware = require("./middleware/error-handler")
 
 ///
 app.use(cors());
-app.use('/api/auth',authRouter);
+app.use('/api/auth',authRouter);//treba neki ruter da se koristi
 app.use('/api',mainRouter)
 
 app.use('/api/writer',writerRouter);
@@ -130,7 +136,7 @@ const start = async () =>{
  
     try {
         //connectDB
-        await connectDB(process.env.MONGO_URI2);
+        await connectDB(process.env.MONGO_URI);
 
         app.listen(port,console.log(`Server is listening port ${port}...`));
     } catch (error) {

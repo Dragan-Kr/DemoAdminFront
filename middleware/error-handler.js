@@ -5,6 +5,8 @@
 const {CustomAPIError} = require('../controller/errors');
 
 const {StatusCodes} = require('http-status-codes');
+
+
 const errorHandlerMiddleware = (err,req,res,next)=>{
 // return res.status(500).json({msq:`Something went wrong,try again later`});
 // return res.status(500).json({msq:err.message});errors\custom-error.js
@@ -12,7 +14,7 @@ const errorHandlerMiddleware = (err,req,res,next)=>{
 let customError = {
   //set default
   statusCode:err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
-  msg:err.message || 'Something went wrong tru again later'
+  msg:err.message || 'Something went wrong try again later'
 };
 // if(err instanceof CustomAPIError){
 //     return res.status(err.statusCode).json({msg: err.message});
