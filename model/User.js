@@ -38,11 +38,16 @@ const UserSchema = new mongoose.Schema({
         minlength:[2,'Minimum length for password is 2'],//8 maskimum 32
       
     },
-     role:{
+    roles: {
+        type: [{
+          role: String,
+          value: Number,
+        }],
+        required: true,
+      },
+      refreshToken:{
         type:String
-      }
-
-
+    }
 });
 UserSchema.pre('save',async function(){
 const salt = await bcrypt.genSalt(10);

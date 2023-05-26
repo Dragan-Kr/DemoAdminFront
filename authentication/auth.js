@@ -1,5 +1,9 @@
 //7:44
+const express = require('express');
 
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+const app = express();
 const User = require("../model/User");
 const { StatusCodes } = require("http-status-codes");
 const {
@@ -8,6 +12,7 @@ const {
 } = require("../controller/errors");
 
 
+app.use(cookieParser());
 
 const handleErrors = (err) => {
 
@@ -120,15 +125,39 @@ const login = async (req, res) => {
     //compare password
 
     const isPasswordCorrect = await user.comparePassword(password);
+
     if (!isPasswordCorrect) {
       throw new UnauthenthicatedError("Invalid Credentials");
     }
     const token = user.createJWT();
-    res
-      .status(StatusCodes.OK)
+    const refreshToken = jwt.sign({userId:this._id,userName:this.userName},process.env.REFRESH_JWT_SECRET,{expiresIn:process.env.JWT_LIFETIME});
+
+    res.cookie('jwt', refreshToken, { httpOnly: true, sameSite: 'None', secure: true, maxAge: 24 * 60 * 60 * 1000 });
+
+     res.status(StatusCodes.OK)
       .json({ user: { userName: user.userName }, token });
   } catch (error) {
-    console.error("Login failed:", error);
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: errors });
+  }
+};
+
+
+
+
+const logout = async (req, res) => {
+  try {
+    
+    const cookies = req.cookies;
+    console.log("LogOut->cookies",cookies)
+    if (!cookies?.jwt)
+     return res.sendStatus(204).json({ message: 'No coockie' }); //No content
+     const refreshToken = cookies.jwt;
+     res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
+    console.log("Logout")
+
+  } catch (error) {
+    console.error('Logout failed:', error);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Logout failed' });
   }
 };
 
@@ -137,40 +166,5 @@ const login = async (req, res) => {
 //   return emailValidator.validate(email)
 // }
 
-function validateEmail(email) {
-  // Regular expression to check email format
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  // Check if email matches the regex pattern
-  if (!emailRegex.test(email)) {
-    return false; // Invalid email format
-  }
-
-  // Split the email address to get the domain part
-  const [localPart, domainPart] = email.split('@');
-
-  // Perform additional checks on the domain
-  if (domainPart) {
-    // Check if domain has a valid format
-    const domainRegex = /^[^\s@]+\.[^\s@]+$/;
-    if (!domainRegex.test(domainPart)) {
-      return false; // Invalid domain format
-    }
-
-    // Check if domain has a valid MX record (optional)
-    const dns = require('dns');
-    return new Promise((resolve, reject) => {
-      dns.resolveMx(domainPart, (error, addresses) => {
-        if (error || addresses.length === 0) {
-          resolve(false); // MX record not found or error occurred
-        } else {
-          resolve(true); // Valid email address
-        }
-      });
-    });
-  }
-
-  return false; // Invalid email format (no domain part)
-}
-
-module.exports = { register, login };
+module.exports = { register, login,logout };

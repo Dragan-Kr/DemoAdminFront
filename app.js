@@ -5,6 +5,7 @@ const cors = require('cors');
 require('dotenv').config();//konekcija
 //midleware
 app.use(express.json());//konekcija
+const cookieParser = require('cookie-parser');
 
 
 
@@ -23,7 +24,7 @@ const postRouter = require('./routes/post');
 const postCategory = require('./routes/postCategory');
 const authRouter = require('./routes/auth');
 const mainRouter =require('./routes/main');
-
+const refreshTokenRouter = require('./routes/refreshToken');
 
 
 //email
@@ -72,6 +73,8 @@ app.use('/api/writer',writerRouter);
 app.use('/api/category',categoryRouter);
 app.use('/api/post',postRouter);
 app.use('/api/postCategory',postCategory);
+//middleware for cookies
+app.use(cookieParser());
 
 
 
