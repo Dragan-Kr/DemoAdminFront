@@ -3,27 +3,33 @@ const {UnauthenthicatedError} = require('../controller/errors');
 
 
 const authentificationMiddleware = async(req,res,next)=>{
-    const authHeader = req.headers.authorization;
+    try {
+    const authHeader = req.headers.authorization || req.headers.Authorization;
+    console.log("authentificationMiddleware->authHeader",authHeader)
 
     if(!authHeader || !authHeader.startsWith('Bearer ')){
-        throw new UnauthenthicatedError('No token provided');//authentification error
-    }
+       
+        throw new UnauthenthicatedError('No token provided');
+    } 
+
     const token = authHeader.split(' ')[1];
+    
     console.log(token);
-    try {
-        const decoded = jwt.verify(token,process.env.JWT_SECRET);
-        console.log(decoded);
-        // const luckyNumber = Math.floor(Math.random() * 100);
-        // res.status(200).json({msg:`Hello ${decoded.username}`,secret:`Here is your authorized data,your lucky number is ${luckyNumber}`});
-        const {id,userName} = decoded;
-        req.user = {id,userName};
-        next();
-
-
+        jwt.verify(
+            token,
+            process.env.JWT_SECRET,
+            (err, decoded) => {
+                if (err) return res.sendStatus(403); //invalid token
+                req.user = decoded.UserInfo.username;
+                req.roles = decoded.UserInfo.roles;
+                next();
+            }
+        );
     } catch (error) {
         throw new UnauthenthicatedError('Not authorized to access this route');
     }
-console.log(req.headers.authorization);
+
 };
 
 module.exports = authentificationMiddleware;
+

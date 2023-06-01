@@ -38,21 +38,18 @@ const UserSchema = new mongoose.Schema({
         minlength:[2,'Minimum length for password is 2'],//8 maskimum 32
       
     },
-    roles: {
-        type: [{
-          role: String,
-          value: Number,
-        }],
-        required: true,
-      },
-      refreshToken:{
+    roles:{
+    type:[String],
+    default:["Editor"]
+    },
+    
+    refreshToken:{
         type:String
     }
 });
 UserSchema.pre('save',async function(){
 const salt = await bcrypt.genSalt(10);
 this.password = await bcrypt.hash(this.password,salt);
-
 });
 
 // UserSchema.methods.getName = function(){
@@ -60,12 +57,12 @@ this.password = await bcrypt.hash(this.password,salt);
 // };
 
 UserSchema.methods.createJWT = function(){//izuci sta znaci
-return jwt.sign({userId:this._id,userName:this.userName},process.env.JWT_SECRET,{expiresIn:process.env.JWT_LIFETIME});
+return jwt.sign({userId:this._id,userName:this.userName,roles:this.roles},process.env.JWT_SECRET,{expiresIn:process.env.JWT_LIFETIME});
 };
-
 
 UserSchema.methods.comparePassword = async function (canditatePassword){
     const isMatch = await bcrypt.compare(canditatePassword,this.password);
     return isMatch;
 };
+
 module.exports = mongoose.model('User',UserSchema);

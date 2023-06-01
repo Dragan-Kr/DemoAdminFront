@@ -16,16 +16,15 @@ const handleRefreshToken = (req, res) => {
         process.env.REFRESH_TOKEN_SECRET,
         (err, decoded) => {
             if (err || foundUser.userName !== decoded.userName) return res.sendStatus(403);
-            const roles = Object.values(foundUser.roles);
             const accessToken = jwt.sign(
                 {
                     "UserInfo": {
-                        "userName": decoded.userName,
-                        "roles": roles
+                        "username": decoded.username,
+                        "roles": decoded.roles
                     }
                 },
-                process.env.ACCESS_TOKEN_SECRET,
-                { expiresIn: '30s' }
+                process.env.JWT_SECRET,
+                { expiresIn: process.env.REFRESH_TOKEN_LIFETIME }
             );
             res.json({ accessToken })
         }

@@ -1,6 +1,9 @@
-const ROLES_LIST={
-    "Admin":1,
-    "Editor":2
-}
+const ROLES_LIST=[
+    "Admin",
+    "Editor"
+
+]
+    
+
 
 module.exports = ROLES_LIST
