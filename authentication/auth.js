@@ -46,12 +46,12 @@ const register = async (req, res) => {
 
     console.log("Register->req.body", req.body);
 
-    const { userName, email, password, roles } = req.body;
-    console.log("userName,email,password", userName, email, password, roles);
+    const { userName, email, password } = req.body;
+    console.log("userName,email,password", userName, email, password);
 
   //  await validateEmail(email);
 
-    const user = await User.create({ userName, email, password, roles });
+    const user = await User.create({ userName, email, password });
     if (user) {
       const token = user.createJWT();
       res
@@ -84,7 +84,7 @@ const login = async (req, res) => {
     }
   
     const user = await User.findOne({ email });
-
+console.log("LogIn->User",user)
     if (!user) {
       throw new UnauthenthicatedError("Invalid Credentials");
     }
@@ -105,7 +105,8 @@ const login = async (req, res) => {
       {
           "UserInfo": {
               "username": user.username,
-              "roles": user.roles
+              "roles": user.roles,
+              "email":user.email
           }
       },
       process.env.JWT_SECRET,
@@ -123,14 +124,16 @@ const login = async (req, res) => {
 
     
     await user.save();
+    const tokenCookieValue = `${accessToken}.${refreshToken}`; 
 
-    res.cookie("jwt", refreshToken, {
+    res.cookie("jwt", tokenCookieValue, {
       httpOnly: true,
       sameSite: "None",
       maxAge: 24 * 60 * 60 * 1000,
     });
 
     res.status(StatusCodes.OK).json({ user: { userName: user.userName }, accessToken });
+
   } catch (error) {
     console.log("Login error", error);
     return res.status(StatusCodes.BAD_REQUEST).json({ message: error });
@@ -139,22 +142,26 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    const cookies = req.cookies;
+        const cookies = req.body[1];
+        console.log("Logout->cookies",cookies)
+
+        console.log("Logout->req.body[1]",req.body[1])
+        const email = req.body[0];
 
     if (!cookies?.jwt){
-     
       throw new BadRequestError("No jwt in cookie");
      //No content
     }
-     
-    const refreshToken = cookies.jwt;
-    console.log("Logout-refreshToken",refreshToken)
-    const user = await User.findOne({ refreshToken });
-    console.log("Logout->User", user);
+    // const refreshToken = cookies.jwt;
+
+
+    const user = await User.findOne({ email });
+    
 
     if (!user) {
       return res.sendStatus(204);
     }
+
     user.refreshToken = "";
     await user.save();
     res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true });

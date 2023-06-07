@@ -1,14 +1,12 @@
-
-
 const express = require('express');
 const app = express();//konekcija(izmedju ostalog)
 const connectDB = require('./db/connect');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();//konekcija
-const helmet = require('helmet');
-const xss = require('xss-clean');
-const rateLimiter = require('express-rate-limit');
+// const helmet = require('helmet');
+// const xss = require('xss-clean');
+// const rateLimiter = require('express-rate-limit');
 
 
 const bodyParser = require('body-parser');
@@ -43,31 +41,7 @@ var upload = multer({storage:storage});
 
 app.use(express.json());//konekcija
 app.use(cors());
-
-
-
-
-
-
 app.use(cookieParser());
-
-app.use('/api/auth',authRouter);//treba neki ruter da se koristi
-app.use('api/auth/token',refreshTokenRouter)
-app.use('/api',mainRouter)
-app.use('/api/writer',writerRouter);
-app.use(authentificationMiddleware)
-app.use('/api/category',categoryRouter);
-app.use('/api/post',postRouter);
-app.use('/api/postCategory',postCategory);
-
-//middleware -- i kada ovo odkomentarisem nece da povuce slike kod update-a
-
-app.use(notFoundMiddleware);
-app.use(errorMiddleware);
-// app.use(auth)
-
-
-
 //http://localhost:8000/images/image1.jpg --pristup slici
 //kada stavim uploads umjesto images radi link od slika u postmanu
 
@@ -95,18 +69,28 @@ app.post('/api/image', upload.array('images2',20), (req, res) => {//OZNACENO
   })
   app.get('/api/send', sendEmail);
 
+app.use('/api/auth',authRouter);//treba neki ruter da se koristi
+app.use('api/auth/token',refreshTokenRouter)
+// app.use('/api',mainRouter)
 
+app.use(authentificationMiddleware)
+app.use('/api/post',postRouter);
+app.use('/api/postCategory',postCategory);
+app.use('/api/writer',writerRouter);
+app.use('/api/category',categoryRouter);
+//middleware -- i kada ovo odkomentarisem nece da povuce slike kod update-a
 
-
+app.use(notFoundMiddleware);
+app.use(errorMiddleware);
+// app.use(auth)
 
 
 const port = process.env.PORT || 8000;
 
-const start = async () =>{
- 
+const start = async () =>{ 
     try {
         //connectDB
-        await connectDB(process.env.MONGO_URI);
+        await connectDB(process.env.MONGO_URI2);
 
         app.listen(port,console.log(`Server is listening port ${port}...`));
     } catch (error) {

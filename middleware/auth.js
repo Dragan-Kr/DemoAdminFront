@@ -6,6 +6,8 @@ const authentificationMiddleware = async(req,res,next)=>{
     try {
     const authHeader = req.headers.authorization || req.headers.Authorization;
     console.log("authentificationMiddleware->authHeader",authHeader)
+    console.log("authentificationMiddleware->req",req.url)
+
 
     if(!authHeader || !authHeader.startsWith('Bearer ')){
        
@@ -22,6 +24,7 @@ const authentificationMiddleware = async(req,res,next)=>{
                 if (err) return res.sendStatus(403); //invalid token
                 req.user = decoded.UserInfo.username;
                 req.roles = decoded.UserInfo.roles;
+                req.email = decoded.UserInfo.email
                 next();
             }
         );
