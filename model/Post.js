@@ -10,6 +10,7 @@ const postSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please provide post title"],
     maxlength: 50,
+    minlength:2
   },
 
   shortDescription: {

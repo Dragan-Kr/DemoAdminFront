@@ -281,7 +281,7 @@ const createPost = async (req, res) => {
     const newPost = await post.save();
     res.status(201).json(newPost);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+   return res.status(400).json({ message: err.message });
   }
 };
 
@@ -333,9 +333,7 @@ const updatePost = async (req, res) => {
   if (!post) {
     throw new NotFoundError(`No post with id ${postId}`);
   }
-  if (title === "") {
-    throw new BadRequestError("Title cant be empty field");
-  }
+  
   res.status(200).json({ post });
 };
 
