@@ -6,7 +6,7 @@ const authentificationMiddleware = async(req,res,next)=>{
     try {
     const authHeader = req.headers.authorization || req.headers.Authorization;
     console.log("authentificationMiddleware->authHeader",authHeader)
-    console.log("authentificationMiddleware->req",req.url)
+    // console.log("authentificationMiddleware->req",req.)
 
 
     if(!authHeader || !authHeader.startsWith('Bearer ')){

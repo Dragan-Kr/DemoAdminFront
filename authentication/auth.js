@@ -54,7 +54,7 @@ const register = async (req, res) => {
     const user = await User.create({ userName, email, password });
     if (user) {
       const token = user.createJWT();
-      res
+   return res
         .status(StatusCodes.CREATED)
         .json({ user: { userName: user.userName } });
     }
@@ -126,13 +126,13 @@ const login = async (req, res) => {
     await user.save();
     const tokenCookieValue = `${accessToken}.${refreshToken}`; 
 
-    res.cookie("jwt", tokenCookieValue, {
+    res.cookie("jwt", accessToken, {
       httpOnly: true,
       sameSite: "None",
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    res.status(StatusCodes.OK).json({ user: { userName: user.userName }, accessToken });
+   return res.status(StatusCodes.OK).json({ user: { userName: user.userName }, accessToken });
 
   } catch (error) {
     console.log("Login error", error);

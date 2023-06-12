@@ -16,10 +16,6 @@ var path2 = require("path");
 
 app.use("/public", express.static(path2.join(__dirname, "uploads"))); //public je naziv samo za korisnika
 
-
-
-
-
 const getAllPosts = async (req, res) => {
   let page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 5;
@@ -101,7 +97,8 @@ const getAllPosts = async (req, res) => {
 
   // console.log("DATA BEFORE SENDING", data)
 
-  res.json({
+  console.log("All data length",allDataLength)
+ return res.json({
     data: data,
     page: page,
     totalPages: Math.ceil(allDataLength / limit), //ovde problem
@@ -237,7 +234,9 @@ const createPost = async (req, res) => {
       console.log("Ovo su images", images);
       // let combinedPath = path2.resolve(filePath, images[index]);
       // let properPath = path2.join(filePath, images[index]);
-      let path = `./uploads/${images[index]}`;
+      // let path = `./uploads/${images[index]}`;
+      let path = images[index];
+
       arrayOfImagesPaths.push(path);
     }
 
@@ -279,62 +278,81 @@ const createPost = async (req, res) => {
 
     //console.log("Post", post)
     const newPost = await post.save();
-    res.status(201).json(newPost);
+    return res.status(201).json(newPost);
   } catch (err) {
-   return res.status(400).json({ message: err.message });
+    if (err.name === "ValidationError") {
+      const errors = {};
+      for (let field in err.errors) {
+        errors[field] = err.errors[field].message;
+      }
+      return res.status(400).json({ message: errors });
+    }
+    return res.status(400).json({ message: err });
   }
 };
-
 const updatePost = async (req, res) => {
-  const {
-    body: {
-      title,
-      shortDescription,
-      mainContent,
-      isPublished,
-      postDate,
-      categories,
-      createdBy,
-      images,
-    },
-    // writer:{writerId},
-    params: { id: postId },
-  } = req;
-
-  const tempPost = await Post.findOne({ _id: postId });
-  console.log("UPDATE POST->IMAGES", images);
-
-  let arrayOfImagesPaths = [];
-  for (let index in images) {
-    console.log("Ovo su images", images);
-    let path = `/uploads/${images[index]}`;
-    arrayOfImagesPaths.push(path);
-  }
-
-  const concatArr = tempPost.images.concat(images);
-
-  console.log("Ovo je arrayOfImagesPaths iz UpdatePost", arrayOfImagesPaths);
-
-  // console.log("Ovo je req.body.title",req.body.title)
-  const post = await Post.findByIdAndUpdate(
-    { _id: postId },
-    {
-      title: req.body.title,
-      shortDescription: req.body.shortDescription,
-      mainContent: req.body.mainContent,
-      isPublished: req.body.isPublished,
-      postDate: req.body.postDate,
-      categories: req.body.categories,
-      createdBy: req.body.createdBy,
-      images: req.body.images,
-    },
-    { new: true, runValidators: true }
-  );
-  if (!post) {
-    throw new NotFoundError(`No post with id ${postId}`);
+  try {
+    const {
+      body: {
+        title,
+        shortDescription,
+        mainContent,
+        isPublished,
+        postDate,
+        categories,
+        createdBy,
+        images,
+      },
+      // writer:{writerId},
+      params: { id: postId },
+    } = req;
+  
+    const tempPost = await Post.findOne({ _id: postId });
+    console.log("UPDATE POST->IMAGES", images);
+  
+    let arrayOfImagesPaths = [];
+    for (let index in images) {
+      console.log("Ovo su images", images);
+      // let path = `/uploads/${images[index]}`;
+      let path = images[index]
+      arrayOfImagesPaths.push(path);
+    }
+  
+    const concatArr = tempPost.images.concat(images);
+  
+    console.log("Ovo je arrayOfImagesPaths iz UpdatePost", arrayOfImagesPaths);
+  
+    // console.log("Ovo je req.body.title",req.body.title)
+    const post = await Post.findByIdAndUpdate(
+      { _id: postId },
+      {
+        title: req.body.title,
+        shortDescription: req.body.shortDescription,
+        mainContent: req.body.mainContent,
+        isPublished: req.body.isPublished,
+        postDate: req.body.postDate,
+        categories: req.body.categories,
+        createdBy: req.body.createdBy,
+        images: req.body.images,
+      },
+      { new: true, runValidators: true }
+    );
+    if (!post) {
+      throw new NotFoundError(`No post with id ${postId}`);
+    }
+  
+   return res.status(200).json({ post });
+  } catch (error) {
+    if (error.name === "ValidationError") {
+      const errors = {};
+      for (let field in error.errors) {
+        errors[field] = error.errors[field].message;
+      }
+      return res.status(400).json({ message: errors });
+    }
+    return res.status(400).json({ message: error });
   }
   
-  res.status(200).json({ post });
 };
 
 const deletePost = async (req, res) => {
@@ -350,11 +368,11 @@ const deletePost = async (req, res) => {
       return res.status(404).json({ msg: `No post with id: ${postID}` });
     }
 
-    res.status(200).json({ post });
+  return  res.status(200).json({ post });
   } catch (error) {
-    res.status(500).json({ msg: error });
+   return res.status(500).json({ msg: error });
   }
-  res.send("delete post");
+return  res.send("delete post");
 };
 
 module.exports = {

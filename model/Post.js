@@ -1,26 +1,26 @@
 const mongoose = require("mongoose");
 // const { format } = require('date-fns');
 
-const autoIncrement = require("mongoose-auto-increment");
+// const autoIncrement = require("mongoose-auto-increment");
 
 const postSchema = new mongoose.Schema({
   index: { type: Number },
 
   title: {
     type: String,
-    required: [true, "Please provide post title"],
-    maxlength: 50,
-    minlength:2
+    required: [true, "Please provide title"],
+    maxlength: [50,'Maximum length for title is 50'],
+    minlength:[2,'Minimum length for title is 2']
   },
 
   shortDescription: {
     type: String,
-    maxlength: 30,
+    // maxlength: [30,'Maximum length for shortDescription is 30'],
   },
 
   mainContent: {
     type: String,
-    maxlength: 400,
+    // maxlength: [400,'Maximum length for shortDescription is 400'],
   },
 
   isPublished: {
